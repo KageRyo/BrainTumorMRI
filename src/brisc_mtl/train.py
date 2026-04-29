@@ -14,14 +14,9 @@ from tqdm import tqdm
 
 from brisc_mtl.config import load_config
 from brisc_mtl.data import build_samples, class_counts, make_loader, split_train_val
-from brisc_mtl.model import ConvNeXtUNetMultiTask
+from brisc_mtl.metrics import binary_detection_accuracy
+from brisc_mtl.runtime import build_model
 from brisc_mtl.utils import device, ensure_dir, save_json, set_seed
-
-
-def binary_detection_accuracy(class_logits: torch.Tensor, labels: torch.Tensor) -> float:
-    pred_has_tumor = class_logits.argmax(dim=1) != 0
-    true_has_tumor = labels != 0
-    return (pred_has_tumor == true_has_tumor).float().mean().item()
 
 
 def run_epoch(
@@ -140,7 +135,7 @@ def main() -> None:
         training=False,
     )
 
-    model = ConvNeXtUNetMultiTask(**cfg["model"]).to(dev)
+    model = build_model(cfg).to(dev)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["train"]["lr"], weight_decay=cfg["train"]["weight_decay"])
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["train"]["epochs"])
     scaler = GradScaler("cuda", enabled=cfg["train"]["amp"] and dev.type == "cuda")

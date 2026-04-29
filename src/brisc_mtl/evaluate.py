@@ -12,7 +12,8 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from tqdm import tqdm
 
 from brisc_mtl.data import INDEX_TO_CLASS, build_samples, make_loader
-from brisc_mtl.model import ConvNeXtUNetMultiTask
+from brisc_mtl.metrics import binary_detection_labels
+from brisc_mtl.runtime import load_model_from_checkpoint
 from brisc_mtl.utils import device, ensure_dir, save_json
 
 
@@ -29,12 +30,11 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    ckpt = torch.load(args.checkpoint, map_location="cpu")
-    cfg = ckpt["config"]
+    dev = device(args.device)
+    model, cfg = load_model_from_checkpoint(args.checkpoint, dev)
     if args.data_root:
         cfg["data_root"] = args.data_root
     out_dir = ensure_dir(args.out or Path(cfg["output_dir"]) / "test_eval")
-    dev = device(args.device)
 
     samples = build_samples(cfg["data_root"], split="test")
     loader = make_loader(
@@ -45,9 +45,6 @@ def main() -> None:
         training=False,
     )
 
-    model = ConvNeXtUNetMultiTask(**cfg["model"]).to(dev)
-    model.load_state_dict(ckpt["model"])
-    model.eval()
     dice_metric = DiceMetric(include_background=True, reduction="mean")
     y_true, y_pred = [], []
 
@@ -64,8 +61,8 @@ def main() -> None:
 
     names = [INDEX_TO_CLASS[i] for i in range(len(INDEX_TO_CLASS))]
     report = classification_report(y_true, y_pred, target_names=names, output_dict=True, zero_division=0)
-    det_true = [label != 0 for label in y_true]
-    det_pred = [label != 0 for label in y_pred]
+    det_true = binary_detection_labels(y_true)
+    det_pred = binary_detection_labels(y_pred)
     metrics = {
         "classification_accuracy": accuracy_score(y_true, y_pred),
         "binary_detection_accuracy": accuracy_score(det_true, det_pred),

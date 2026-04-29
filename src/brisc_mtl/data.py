@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import random
 import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -10,8 +9,8 @@ import torch
 from PIL import Image
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
-from torchvision.transforms import InterpolationMode
-from torchvision.transforms import functional as TF
+
+from brisc_mtl.preprocessing import augment_pair, image_to_tensor, load_grayscale, mask_to_tensor, resize_pair
 
 CLASS_TO_INDEX = {
     "no_tumor": 0,
@@ -110,48 +109,6 @@ def split_train_val(
     return train, val
 
 
-def _load_grayscale(path: Path) -> Image.Image:
-    return Image.open(path).convert("L")
-
-
-def _resize_pair(image: Image.Image, mask: Image.Image, image_size: int) -> tuple[Image.Image, Image.Image]:
-    size = [image_size, image_size]
-    image = TF.resize(image, size=size, interpolation=InterpolationMode.BILINEAR)
-    mask = TF.resize(mask, size=size, interpolation=InterpolationMode.NEAREST)
-    return image, mask
-
-
-def _augment_pair(image: Image.Image, mask: Image.Image) -> tuple[Image.Image, Image.Image]:
-    if random.random() < 0.5:
-        image = TF.hflip(image)
-        mask = TF.hflip(mask)
-    if random.random() < 0.5:
-        image = TF.vflip(image)
-        mask = TF.vflip(mask)
-    if random.random() < 0.25:
-        angle = random.uniform(-12.0, 12.0)
-        scale = random.uniform(0.9, 1.1)
-        image = TF.affine(
-            image,
-            angle=angle,
-            translate=[0, 0],
-            scale=scale,
-            shear=[0.0, 0.0],
-            interpolation=InterpolationMode.BILINEAR,
-            fill=0,
-        )
-        mask = TF.affine(
-            mask,
-            angle=angle,
-            translate=[0, 0],
-            scale=scale,
-            shear=[0.0, 0.0],
-            interpolation=InterpolationMode.NEAREST,
-            fill=0,
-        )
-    return image, mask
-
-
 class BriscMultiTaskDataset(Dataset):
     def __init__(self, samples: Sequence[BriscSample], image_size: int, training: bool) -> None:
         self.samples = list(samples)
@@ -163,17 +120,17 @@ class BriscMultiTaskDataset(Dataset):
 
     def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
         sample = self.samples[index]
-        image = _load_grayscale(sample.image)
+        image = load_grayscale(sample.image)
         if sample.mask is None:
             mask = Image.new("L", image.size, 0)
         else:
-            mask = _load_grayscale(sample.mask)
-        image, mask = _resize_pair(image, mask, self.image_size)
+            mask = load_grayscale(sample.mask)
+        image, mask = resize_pair(image, mask, self.image_size)
         if self.training:
-            image, mask = _augment_pair(image, mask)
+            image, mask = augment_pair(image, mask)
 
-        image_tensor = TF.to_tensor(image).float()
-        mask_tensor = (TF.to_tensor(mask) > 0).float()
+        image_tensor = image_to_tensor(image)
+        mask_tensor = mask_to_tensor(mask)
         return {
             "image": image_tensor,
             "mask": mask_tensor,

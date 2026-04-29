@@ -8,12 +8,10 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
 import matplotlib.pyplot as plt
 import torch
-from PIL import Image
-from torchvision.transforms import InterpolationMode
-from torchvision.transforms import functional as TF
 
 from brisc_mtl.data import INDEX_TO_CLASS
-from brisc_mtl.model import ConvNeXtUNetMultiTask
+from brisc_mtl.preprocessing import load_image_tensor
+from brisc_mtl.runtime import load_model_from_checkpoint
 from brisc_mtl.utils import device, ensure_dir
 
 
@@ -31,22 +29,11 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    ckpt = torch.load(args.checkpoint, map_location="cpu")
-    cfg = ckpt["config"]
     dev = device(args.device)
+    model, cfg = load_model_from_checkpoint(args.checkpoint, dev)
     out_dir = ensure_dir(args.out_dir)
 
-    image_pil = Image.open(args.image).convert("L")
-    image_pil = TF.resize(
-        image_pil,
-        size=[cfg["data"]["image_size"], cfg["data"]["image_size"]],
-        interpolation=InterpolationMode.BILINEAR,
-    )
-    image = TF.to_tensor(image_pil).float().unsqueeze(0).to(dev)
-
-    model = ConvNeXtUNetMultiTask(**cfg["model"]).to(dev)
-    model.load_state_dict(ckpt["model"])
-    model.eval()
+    image = load_image_tensor(args.image, cfg["data"]["image_size"]).unsqueeze(0).to(dev)
 
     with torch.no_grad():
         out = model(image)
