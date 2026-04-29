@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
+from pathlib import Path
 
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
@@ -17,6 +19,20 @@ from brisc_mtl.data import build_samples, class_counts, make_loader, split_train
 from brisc_mtl.metrics import binary_detection_accuracy
 from brisc_mtl.runtime import build_model
 from brisc_mtl.utils import device, ensure_dir, save_json, set_seed
+
+
+def load_history(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8") as f:
+        payload = json.load(f)
+    return payload.get("history", [])
+
+
+def best_score_from_history(history: list[dict]) -> float:
+    if not history:
+        return -1.0
+    return max(float(record.get("score", -1.0)) for record in history)
 
 
 def run_epoch(
@@ -93,6 +109,11 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=None, help="Override train.batch_size from the config.")
     parser.add_argument("--eval-batch-size", type=int, default=None, help="Override eval.batch_size from the config.")
     parser.add_argument("--output-dir", default=None, help="Override output_dir from the config.")
+    parser.add_argument(
+        "--resume",
+        default=None,
+        help="Resume training from a checkpoint. Use outputs/.../last.pt to continue an interrupted run.",
+    )
     args = parser.parse_args()
     cfg = load_config(args.config)
     if args.epochs is not None:
@@ -143,6 +164,27 @@ def main() -> None:
     seg_loss_fn = DiceFocalLoss(sigmoid=True, squared_pred=True)
     dice_metric = DiceMetric(include_background=True, reduction="mean")
 
+    history = load_history(out_dir / "history.json")
+    best_score = best_score_from_history(history)
+    start_epoch = 1
+    if args.resume:
+        checkpoint = torch.load(args.resume, map_location=dev)
+        model.load_state_dict(checkpoint["model"])
+        start_epoch = int(checkpoint.get("epoch", 0)) + 1
+        if "optimizer" in checkpoint:
+            optimizer.load_state_dict(checkpoint["optimizer"])
+        else:
+            print("resume_warning=missing_optimizer_state using_fresh_optimizer=true")
+        if "scheduler" in checkpoint:
+            scheduler.load_state_dict(checkpoint["scheduler"])
+        else:
+            print("resume_warning=missing_scheduler_state using_fresh_scheduler=true")
+        if "scaler" in checkpoint and scaler.is_enabled():
+            scaler.load_state_dict(checkpoint["scaler"])
+        history = checkpoint.get("history", history)
+        best_score = float(checkpoint.get("best_score", best_score_from_history(history)))
+        print(f"resume_ok checkpoint={args.resume} start_epoch={start_epoch} best_score={best_score:.4f}")
+
     if args.dry_run:
         print(
             "dry_run_ok "
@@ -153,9 +195,11 @@ def main() -> None:
         )
         return
 
-    best_score = -1.0
-    history = []
-    for epoch in range(1, cfg["train"]["epochs"] + 1):
+    if start_epoch > cfg["train"]["epochs"]:
+        print(f"training_already_complete start_epoch={start_epoch} configured_epochs={cfg['train']['epochs']}")
+        return
+
+    for epoch in range(start_epoch, cfg["train"]["epochs"] + 1):
         train_metrics = run_epoch(
             model, train_loader, optimizer, scaler, cls_loss_fn, seg_loss_fn, dice_metric, cfg, dev
         )
@@ -181,7 +225,19 @@ def main() -> None:
                 out_dir / "best.pt",
             )
 
-    torch.save({"model": model.state_dict(), "config": cfg, "epoch": cfg["train"]["epochs"]}, out_dir / "last.pt")
+        torch.save(
+            {
+                "model": model.state_dict(),
+                "config": cfg,
+                "epoch": epoch,
+                "optimizer": optimizer.state_dict(),
+                "scheduler": scheduler.state_dict(),
+                "scaler": scaler.state_dict() if scaler.is_enabled() else None,
+                "history": history,
+                "best_score": best_score,
+            },
+            out_dir / "last.pt",
+        )
 
 
 if __name__ == "__main__":
