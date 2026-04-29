@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import List
-
-import torch
-from torch import nn
-import torch.nn.functional as F
 import timm
+import torch
+import torch.nn.functional as F
+from torch import nn
 
 
 class ConvBlock(nn.Module):
@@ -49,7 +47,7 @@ class ConvNeXtUNetMultiTask(nn.Module):
             pretrained=pretrained,
             in_chans=in_channels,
         )
-        channels: List[int] = self.encoder.feature_info.channels()
+        channels: list[int] = self.encoder.feature_info.channels()
         if len(channels) < 4:
             raise ValueError(f"Expected at least 4 feature levels from {backbone}, got {channels}")
 
