@@ -78,10 +78,22 @@ data/brisc2025/
     test/masks/
 ```
 
+## Preflight
+
+Before training, verify the environment, CUDA visibility, dataset layout, dependencies, and a CPU model shape smoke test:
+
+```bash
+scripts/preflight.sh
+```
+
+This project is configured to train with PyTorch on GPU. The training entry point defaults to `--device cuda` and will fail instead of silently falling back to CPU if CUDA is not visible.
+
 ## Train
 
 ```bash
-python -m brisc_mtl.train --config configs/convnext_base_mtl.yaml
+/mnt/8tb_hdd/ryo/miniconda3/bin/conda run -n dl-class-ryo python -m brisc_mtl.train \
+  --config configs/convnext_base_mtl.yaml \
+  --device cuda
 ```
 
 Outputs are written to `outputs/convnext_base_mtl/`:
@@ -90,6 +102,18 @@ Outputs are written to `outputs/convnext_base_mtl/`:
 - `last.pt`: last epoch checkpoint
 - `history.json`: epoch metrics
 - `data_summary.json`: split and class counts
+
+For a one-epoch smoke run without changing the config:
+
+```bash
+GPU_ID=0 BATCH_SIZE=8 scripts/train_smoke_1epoch.sh
+```
+
+For the full training run:
+
+```bash
+GPU_ID=0 BATCH_SIZE=16 scripts/train_full.sh
+```
 
 ## Evaluate
 
