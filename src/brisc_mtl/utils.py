@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import random
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 import torch
@@ -22,10 +22,21 @@ def ensure_dir(path: str | Path) -> Path:
     return out
 
 
-def save_json(payload: Dict[str, Any], path: str | Path) -> None:
+def save_json(payload: dict[str, Any], path: str | Path) -> None:
     with Path(path).open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
 
 
-def device() -> torch.device:
-    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def device(preference: str = "cuda") -> torch.device:
+    if preference not in {"cuda", "cpu", "auto"}:
+        raise ValueError(f"Unsupported device preference: {preference}")
+    if preference == "cpu":
+        return torch.device("cpu")
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if preference == "auto":
+        return torch.device("cpu")
+    raise RuntimeError(
+        "CUDA was requested, but PyTorch cannot see a CUDA device. "
+        "Check the NVIDIA driver, container/WSL GPU passthrough, and the installed PyTorch CUDA build."
+    )

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
+
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
 import torch
 from monai.metrics import DiceMetric
@@ -18,6 +21,12 @@ def main() -> None:
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--data-root", default=None)
     parser.add_argument("--out", default=None)
+    parser.add_argument(
+        "--device",
+        choices=["cuda", "cpu", "auto"],
+        default="cuda",
+        help="Evaluation device. Default is 'cuda' so evaluation will not silently fall back to CPU.",
+    )
     args = parser.parse_args()
 
     ckpt = torch.load(args.checkpoint, map_location="cpu")
@@ -25,7 +34,7 @@ def main() -> None:
     if args.data_root:
         cfg["data_root"] = args.data_root
     out_dir = ensure_dir(args.out or Path(cfg["output_dir"]) / "test_eval")
-    dev = device()
+    dev = device(args.device)
 
     samples = build_samples(cfg["data_root"], split="test")
     loader = make_loader(

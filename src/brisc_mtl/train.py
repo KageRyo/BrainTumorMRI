@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
-from typing import Dict
+import os
+
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
 import torch
 from monai.losses import DiceFocalLoss
 from monai.metrics import DiceMetric
 from torch import nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from tqdm import tqdm
 
 from brisc_mtl.config import load_config
@@ -31,9 +32,9 @@ def run_epoch(
     cls_loss_fn: nn.Module,
     seg_loss_fn: nn.Module,
     dice_metric: DiceMetric,
-    cfg: Dict,
+    cfg: dict,
     dev: torch.device,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     training = optimizer is not None
     model.train(training)
     dice_metric.reset()
@@ -47,7 +48,7 @@ def run_epoch(
         masks = batch["mask"].to(dev, non_blocking=True)
         labels = batch["label"].to(dev, non_blocking=True)
 
-        with torch.set_grad_enabled(training), autocast(enabled=cfg["train"]["amp"] and dev.type == "cuda"):
+        with torch.set_grad_enabled(training), autocast(dev.type, enabled=cfg["train"]["amp"] and dev.type == "cuda"):
             out = model(images)
             cls_loss = cls_loss_fn(out["class_logits"], labels)
             seg_loss = seg_loss_fn(out["mask_logits"], masks)
@@ -82,12 +83,35 @@ def run_epoch(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train BRISC multitask ConvNeXt U-Net.")
     parser.add_argument("--config", default="configs/convnext_base_mtl.yaml")
+    parser.add_argument(
+        "--device",
+        choices=["cuda", "cpu", "auto"],
+        default="cuda",
+        help="Training device. Default is 'cuda' so training will not silently fall back to CPU.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate setup and exit before the first training epoch.",
+    )
+    parser.add_argument("--epochs", type=int, default=None, help="Override train.epochs from the config.")
+    parser.add_argument("--batch-size", type=int, default=None, help="Override train.batch_size from the config.")
+    parser.add_argument("--eval-batch-size", type=int, default=None, help="Override eval.batch_size from the config.")
+    parser.add_argument("--output-dir", default=None, help="Override output_dir from the config.")
     args = parser.parse_args()
     cfg = load_config(args.config)
+    if args.epochs is not None:
+        cfg["train"]["epochs"] = args.epochs
+    if args.batch_size is not None:
+        cfg["train"]["batch_size"] = args.batch_size
+    if args.eval_batch_size is not None:
+        cfg["eval"]["batch_size"] = args.eval_batch_size
+    if args.output_dir is not None:
+        cfg["output_dir"] = args.output_dir
     set_seed(cfg["seed"])
 
     out_dir = ensure_dir(cfg["output_dir"])
-    dev = device()
+    dev = device(args.device)
 
     samples = build_samples(cfg["data_root"], split="train")
     train_samples, val_samples = split_train_val(samples, cfg["data"]["val_fraction"], cfg["seed"])
@@ -119,10 +143,20 @@ def main() -> None:
     model = ConvNeXtUNetMultiTask(**cfg["model"]).to(dev)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["train"]["lr"], weight_decay=cfg["train"]["weight_decay"])
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["train"]["epochs"])
-    scaler = GradScaler(enabled=cfg["train"]["amp"] and dev.type == "cuda")
+    scaler = GradScaler("cuda", enabled=cfg["train"]["amp"] and dev.type == "cuda")
     cls_loss_fn = nn.CrossEntropyLoss()
     seg_loss_fn = DiceFocalLoss(sigmoid=True, squared_pred=True)
     dice_metric = DiceMetric(include_background=True, reduction="mean")
+
+    if args.dry_run:
+        print(
+            "dry_run_ok "
+            f"device={dev.type} "
+            f"train_batches={len(train_loader)} "
+            f"val_batches={len(val_loader)} "
+            f"output_dir={out_dir}"
+        )
+        return
 
     best_score = -1.0
     history = []
@@ -147,7 +181,10 @@ def main() -> None:
         )
         if score > best_score:
             best_score = score
-            torch.save({"model": model.state_dict(), "config": cfg, "epoch": epoch, "metrics": val_metrics}, out_dir / "best.pt")
+            torch.save(
+                {"model": model.state_dict(), "config": cfg, "epoch": epoch, "metrics": val_metrics},
+                out_dir / "best.pt",
+            )
 
     torch.save({"model": model.state_dict(), "config": cfg, "epoch": cfg["train"]["epochs"]}, out_dir / "last.pt")
 
