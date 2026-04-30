@@ -15,3 +15,4 @@ Validation score = 0.5 * classification accuracy + 0.5 * Dice.
 - `convnext_base_mtl` has the best test Dice, but the margin over `convnext_tiny_mtl` is small.
 - `resnet50_mtl` is a useful CNN baseline, but it underperforms both ConvNeXt variants on validation score and test Dice.
 - The current best practical default is `convnext_tiny_mtl` when classification/detection is the priority, and `convnext_base_mtl` when segmentation Dice is the priority.
+- Train/validation curve and overfitting-gap details are in [history_analysis.md](history_analysis.md).
