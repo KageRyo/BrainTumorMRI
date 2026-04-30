@@ -220,6 +220,12 @@ Regenerate evaluation metrics, training curves, qualitative predictions, and rep
 GPU_ID=0 RUN_DIR=outputs/convnext_tiny_mtl scripts/make_report_assets.sh
 ```
 
+## License
+
+This repository's source code, scripts, and documentation are licensed under the Apache License 2.0. The BRISC 2025
+dataset, downloaded data, local checkpoints, and generated outputs are not included in this repository license and
+remain subject to their own terms.
+
 ## Notes
 
 This code uses the segmentation task images as the source of truth because each sample has both an image-level label and a pixel-wise mask. The class label is inferred from the BRISC filename convention, for example `_gl_`, `_me_`, `_pi_`, and `_nt_`.
