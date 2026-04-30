@@ -131,6 +131,14 @@ The remaining classification errors are concentrated between glioma and meningio
 predicted as meningioma. The segmentation score is lower than classification performance, so boundary quality and
 small tumor coverage should be reviewed manually before presenting the model as a segmentation-focused system.
 
+Classification failure examples:
+
+![Classification failures](figures/classification_failures.png)
+
+Lowest Dice segmentation examples:
+
+![Low Dice cases](figures/low_dice_cases.png)
+
 ## 11. Limitations
 
 - The report uses a single official test split; external validation is still missing.
@@ -138,11 +146,10 @@ small tumor coverage should be reviewed manually before presenting the model as 
 - The binary detection metrics are derived from the 4-class classification head rather than a separately calibrated
   clinical operating threshold.
 - The demo and model outputs are for research only, not diagnosis.
-- Grad-CAM and detailed failure-case visual analysis are still future work.
+- Grad-CAM visual analysis is still future work.
 
 ## 12. Future Work
 
 - Add Grad-CAM examples for classification explainability.
-- Add structured failure-case grids for misclassified and low-Dice samples.
 - Repeat the main experiment with more seeds and report mean plus standard deviation.
 - Evaluate on an external dataset or held-out institution split if available.
