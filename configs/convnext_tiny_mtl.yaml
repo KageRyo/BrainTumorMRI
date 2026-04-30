@@ -26,6 +26,10 @@ train:
   amp: true
   cls_loss_weight: 1.0
   seg_loss_weight: 1.0
+  early_stopping:
+    enabled: true
+    patience: 8
+    min_delta: 0.001
 
 eval:
   batch_size: 16

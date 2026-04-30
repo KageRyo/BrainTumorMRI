@@ -35,6 +35,19 @@ def best_score_from_history(history: list[dict]) -> float:
     return max(float(record.get("score", -1.0)) for record in history)
 
 
+def epochs_since_best(history: list[dict], min_delta: float) -> int:
+    best = -1.0
+    best_epoch_index = -1
+    for index, record in enumerate(history):
+        score = float(record.get("score", -1.0))
+        if score > best + min_delta:
+            best = score
+            best_epoch_index = index
+    if best_epoch_index < 0:
+        return 0
+    return len(history) - best_epoch_index - 1
+
+
 def run_epoch(
     model: nn.Module,
     loader: torch.utils.data.DataLoader,
@@ -166,6 +179,11 @@ def main() -> None:
 
     history = load_history(out_dir / "history.json")
     best_score = best_score_from_history(history)
+    early_cfg = cfg["train"].get("early_stopping", {})
+    early_enabled = bool(early_cfg.get("enabled", False))
+    early_patience = int(early_cfg.get("patience", 0))
+    early_min_delta = float(early_cfg.get("min_delta", 0.0))
+    stale_epochs = epochs_since_best(history, early_min_delta) if early_enabled else 0
     start_epoch = 1
     if args.resume:
         checkpoint = torch.load(args.resume, map_location=dev)
@@ -183,6 +201,7 @@ def main() -> None:
             scaler.load_state_dict(checkpoint["scaler"])
         history = checkpoint.get("history", history)
         best_score = float(checkpoint.get("best_score", best_score_from_history(history)))
+        stale_epochs = int(checkpoint.get("stale_epochs", epochs_since_best(history, early_min_delta)))
         print(f"resume_ok checkpoint={args.resume} start_epoch={start_epoch} best_score={best_score:.4f}")
 
     if args.dry_run:
@@ -218,12 +237,16 @@ def main() -> None:
             f"val_det_acc={val_metrics['det_acc']:.4f} "
             f"val_dice={val_metrics['dice']:.4f}"
         )
-        if score > best_score:
+        improved = score > best_score + early_min_delta
+        if improved:
             best_score = score
+            stale_epochs = 0
             torch.save(
                 {"model": model.state_dict(), "config": cfg, "epoch": epoch, "metrics": val_metrics},
                 out_dir / "best.pt",
             )
+        elif early_enabled:
+            stale_epochs += 1
 
         torch.save(
             {
@@ -235,9 +258,19 @@ def main() -> None:
                 "scaler": scaler.state_dict() if scaler.is_enabled() else None,
                 "history": history,
                 "best_score": best_score,
+                "stale_epochs": stale_epochs,
             },
             out_dir / "last.pt",
         )
+
+        if early_enabled and early_patience > 0 and stale_epochs >= early_patience:
+            print(
+                f"early_stop epoch={epoch:03d} "
+                f"best_score={best_score:.4f} "
+                f"stale_epochs={stale_epochs} "
+                f"patience={early_patience}"
+            )
+            break
 
 
 if __name__ == "__main__":
