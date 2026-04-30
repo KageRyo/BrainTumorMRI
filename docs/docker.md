@@ -137,3 +137,14 @@ scripts/make_report_assets.sh
 
 This updates `metrics.json`, training curves, qualitative prediction grids, and the report copy of the confusion
 matrix.
+
+## Troubleshooting
+
+- Checkpoint not found: set `CHECKPOINT=outputs/convnext_tiny_mtl/best.pt` or mount a directory that contains the
+  requested `best.pt`. Checkpoints are intentionally not copied into the Docker image.
+- Port already in use: run with another host port, for example `PORT=7861 scripts/docker_run_demo.sh`, then open
+  <http://127.0.0.1:7861>.
+- Docker permission denied: add the user to the `docker` group and start a new login session, or run through a shell
+  that has Docker group access.
+- GPU container cannot see CUDA: install and configure NVIDIA Container Toolkit on the host, then verify
+  `docker run --rm --gpus all nvidia/cuda:12.1.1-base-ubuntu22.04 nvidia-smi`.
