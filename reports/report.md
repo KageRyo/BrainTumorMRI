@@ -108,13 +108,20 @@ marks ground truth, red marks prediction, and yellow marks overlap.
 
 ![Qualitative predictions](figures/qualitative_convnext_tiny_mtl.png)
 
-## 8. Failure Cases
+## 8. Calibration Analysis
+
+The classification head is well calibrated on the official BRISC test split, with ECE 0.0055. The reliability diagram
+and confidence histogram below show most predictions concentrated at high confidence.
+
+![Calibration curve](figures/calibration_curve.png)
+
+## 9. Failure Cases
 
 The remaining classification errors are concentrated between glioma and meningioma, with one pituitary case
 predicted as meningioma. The segmentation score is lower than classification performance, so boundary quality and
 small tumor coverage should be reviewed manually before presenting the model as a segmentation-focused system.
 
-## 9. Limitations
+## 10. Limitations
 
 - The report uses a single official test split; external validation is still missing.
 - The current model is 2D slice-based and does not use volumetric MRI context.
@@ -123,10 +130,10 @@ small tumor coverage should be reviewed manually before presenting the model as 
 - The demo and model outputs are for research only, not diagnosis.
 - Grad-CAM and detailed failure-case visual analysis are still future work.
 
-## 10. Future Work
+## 11. Future Work
 
 - Add Grad-CAM examples for classification explainability.
-- Add calibration plots and threshold analysis for tumor detection.
+- Add threshold analysis for tumor detection.
 - Add structured failure-case grids for misclassified and low-Dice samples.
 - Repeat the main experiment with more seeds and report mean plus standard deviation.
 - Evaluate on an external dataset or held-out institution split if available.

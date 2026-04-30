@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +24,9 @@ def load_checkpoint(path: str | Path) -> dict[str, Any]:
 def load_model_from_checkpoint(path: str | Path, dev: torch.device) -> tuple[nn.Module, dict[str, Any]]:
     ckpt = load_checkpoint(path)
     cfg = ckpt["config"]
-    model = build_model(cfg).to(dev)
+    model_cfg = deepcopy(cfg)
+    model_cfg["model"]["pretrained"] = False
+    model = build_model(model_cfg).to(dev)
     model.load_state_dict(ckpt["model"])
     model.eval()
     return model, cfg
