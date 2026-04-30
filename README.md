@@ -169,6 +169,12 @@ comparisons, training curves, multi-seed results, qualitative examples, and the 
 
 ![Qualitative predictions](reports/figures/qualitative_convnext_tiny_mtl.png)
 
+## Explainability
+
+Grad-CAM examples visualize which image regions contributed to the classification decision.
+
+![Grad-CAM examples](reports/figures/gradcam_examples.png)
+
 For the full reproduction workflow, see [docs/runbook.md](docs/runbook.md).
 
 ## Predict One Image

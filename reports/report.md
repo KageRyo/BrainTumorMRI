@@ -108,14 +108,21 @@ marks ground truth, red marks prediction, and yellow marks overlap.
 
 ![Qualitative predictions](figures/qualitative_convnext_tiny_mtl.png)
 
-## 8. Calibration Analysis
+## 8. Explainability
+
+Grad-CAM examples visualize which image regions contributed to the classification decision. These maps are qualitative
+debugging aids, not clinical explanations.
+
+![Grad-CAM examples](figures/gradcam_examples.png)
+
+## 9. Calibration Analysis
 
 The classification head is well calibrated on the official BRISC test split, with ECE 0.0055. The reliability diagram
 and confidence histogram below show most predictions concentrated at high confidence.
 
 ![Calibration curve](figures/calibration_curve.png)
 
-## 9. Threshold Analysis
+## 10. Threshold Analysis
 
 Binary tumor detection threshold analysis is documented in [threshold_analysis.md](threshold_analysis.md). On this test
 split, thresholds 0.3 and 0.5 both preserve 1.0000 sensitivity and 1.0000 specificity; threshold 0.7 reduces
@@ -125,7 +132,7 @@ sensitivity to 0.9988 while keeping specificity at 1.0000.
 
 ![PR curve](figures/pr_curve.png)
 
-## 10. Failure Cases
+## 11. Failure Cases
 
 The remaining classification errors are concentrated between glioma and meningioma, with one pituitary case
 predicted as meningioma. The segmentation score is lower than classification performance, so boundary quality and
@@ -139,17 +146,15 @@ Lowest Dice segmentation examples:
 
 ![Low Dice cases](figures/low_dice_cases.png)
 
-## 11. Limitations
+## 12. Limitations
 
 - The report uses a single official test split; external validation is still missing.
 - The current model is 2D slice-based and does not use volumetric MRI context.
 - The binary detection metrics are derived from the 4-class classification head rather than a separately calibrated
   clinical operating threshold.
 - The demo and model outputs are for research only, not diagnosis.
-- Grad-CAM visual analysis is still future work.
 
-## 12. Future Work
+## 13. Future Work
 
-- Add Grad-CAM examples for classification explainability.
 - Repeat the main experiment with more seeds and report mean plus standard deviation.
 - Evaluate on an external dataset or held-out institution split if available.
