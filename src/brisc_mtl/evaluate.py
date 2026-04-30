@@ -6,6 +6,7 @@ from pathlib import Path
 
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
+import matplotlib.pyplot as plt
 import torch
 from monai.metrics import DiceMetric
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -15,6 +16,28 @@ from brisc_mtl.data import INDEX_TO_CLASS, build_samples, make_loader
 from brisc_mtl.metrics import binary_detection_labels
 from brisc_mtl.runtime import load_model_from_checkpoint
 from brisc_mtl.utils import device, ensure_dir, save_json
+
+
+def plot_confusion_matrix(matrix: list[list[int]], names: list[str], out_path: Path) -> None:
+    fig, axis = plt.subplots(figsize=(7, 6))
+    image = axis.imshow(matrix, cmap="Blues")
+    axis.set_xticks(range(len(names)), labels=names, rotation=35, ha="right")
+    axis.set_yticks(range(len(names)), labels=names)
+    axis.set_xlabel("Predicted label")
+    axis.set_ylabel("True label")
+    axis.set_title("BRISC Test Confusion Matrix")
+
+    max_value = max(max(row) for row in matrix)
+    threshold = max_value / 2
+    for row_index, row in enumerate(matrix):
+        for col_index, value in enumerate(row):
+            color = "white" if value > threshold else "black"
+            axis.text(col_index, row_index, str(value), ha="center", va="center", color=color)
+
+    fig.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=180)
+    plt.close(fig)
 
 
 def main() -> None:
@@ -63,12 +86,16 @@ def main() -> None:
     report = classification_report(y_true, y_pred, target_names=names, output_dict=True, zero_division=0)
     det_true = binary_detection_labels(y_true)
     det_pred = binary_detection_labels(y_pred)
+    cm = confusion_matrix(y_true, y_pred).tolist()
+    confusion_matrix_path = out_dir / "confusion_matrix.png"
+    plot_confusion_matrix(cm, names, confusion_matrix_path)
     metrics = {
         "classification_accuracy": accuracy_score(y_true, y_pred),
         "binary_detection_accuracy": accuracy_score(det_true, det_pred),
         "dice": dice_metric.aggregate().item(),
         "classification_report": report,
-        "confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
+        "confusion_matrix": cm,
+        "confusion_matrix_png": str(confusion_matrix_path),
     }
     save_json(metrics, out_dir / "metrics.json")
     print(metrics)
