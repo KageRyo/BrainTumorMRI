@@ -115,13 +115,23 @@ and confidence histogram below show most predictions concentrated at high confid
 
 ![Calibration curve](figures/calibration_curve.png)
 
-## 9. Failure Cases
+## 9. Threshold Analysis
+
+Binary tumor detection threshold analysis is documented in [threshold_analysis.md](threshold_analysis.md). On this test
+split, thresholds 0.3 and 0.5 both preserve 1.0000 sensitivity and 1.0000 specificity; threshold 0.7 reduces
+sensitivity to 0.9988 while keeping specificity at 1.0000.
+
+![ROC curve](figures/roc_curve.png)
+
+![PR curve](figures/pr_curve.png)
+
+## 10. Failure Cases
 
 The remaining classification errors are concentrated between glioma and meningioma, with one pituitary case
 predicted as meningioma. The segmentation score is lower than classification performance, so boundary quality and
 small tumor coverage should be reviewed manually before presenting the model as a segmentation-focused system.
 
-## 10. Limitations
+## 11. Limitations
 
 - The report uses a single official test split; external validation is still missing.
 - The current model is 2D slice-based and does not use volumetric MRI context.
@@ -130,10 +140,9 @@ small tumor coverage should be reviewed manually before presenting the model as 
 - The demo and model outputs are for research only, not diagnosis.
 - Grad-CAM and detailed failure-case visual analysis are still future work.
 
-## 11. Future Work
+## 12. Future Work
 
 - Add Grad-CAM examples for classification explainability.
-- Add threshold analysis for tumor detection.
 - Add structured failure-case grids for misclassified and low-Dice samples.
 - Repeat the main experiment with more seeds and report mean plus standard deviation.
 - Evaluate on an external dataset or held-out institution split if available.
