@@ -177,6 +177,8 @@ The command prints class probabilities and writes a predicted binary mask to `ou
 
 ## Interactive Demo
 
+![Gradio demo](reports/figures/gradio_demo_screenshot.png)
+
 Install the optional demo dependency:
 
 ```bash
