@@ -18,3 +18,4 @@ Validation score = 0.5 * classification accuracy + 0.5 * Dice.
 - `convnext_tiny_seg15_wd1e4_mtl` stopped early at 23 epochs and did not improve over the untuned Tiny run.
 - The current best practical default is `convnext_tiny_mtl` when classification/detection is the priority, and `convnext_base_mtl` when segmentation Dice is the priority.
 - Train/validation curve and overfitting-gap details are in [history_analysis.md](history_analysis.md).
+- Multi-seed stability results for `convnext_tiny_mtl` are in [multiseed_convnext_tiny.md](multiseed_convnext_tiny.md).
