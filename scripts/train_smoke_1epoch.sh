@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CONDA_BIN="${CONDA_BIN:-/mnt/8tb_hdd/ryo/miniconda3/bin/conda}"
-ENV_NAME="${ENV_NAME:-dl-class-ryo}"
+CONDA_BIN="${CONDA_BIN:-conda}"
+ENV_NAME="${ENV_NAME:-brain-tumor-mri}"
 CONFIG="${CONFIG:-configs/convnext_base_mtl.yaml}"
 GPU_ID="${GPU_ID:-0}"
 BATCH_SIZE="${BATCH_SIZE:-8}"

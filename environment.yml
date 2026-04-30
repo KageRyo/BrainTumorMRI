@@ -1,4 +1,4 @@
-name: dl-class-ryo
+name: brain-tumor-mri
 channels:
   - pytorch
   - nvidia

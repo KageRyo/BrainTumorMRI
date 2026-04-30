@@ -45,14 +45,14 @@ Create the conda environment:
 
 ```bash
 conda env create -f environment.yml
-conda activate dl-class-ryo
+conda activate brain-tumor-mri
 ```
 
 If you already created the environment and changed dependencies:
 
 ```bash
 conda env update -f environment.yml --prune
-conda activate dl-class-ryo
+conda activate brain-tumor-mri
 ```
 
 The project uses `pyproject.toml` for Python package metadata and dependencies. PyTorch and CUDA are installed through conda because that is more reliable than resolving GPU wheels through pip.

@@ -7,14 +7,14 @@ This runbook covers the standard workflow for reproducing the BRISC multitask MR
 Create or update the conda environment:
 
 ```bash
-/mnt/8tb_hdd/ryo/miniconda3/bin/conda env create -f environment.yml
-conda activate dl-class-ryo
+conda env create -f environment.yml
+conda activate brain-tumor-mri
 ```
 
 If the environment already exists:
 
 ```bash
-/mnt/8tb_hdd/ryo/miniconda3/bin/conda env update -f environment.yml --prune
+conda env update -f environment.yml --prune
 ```
 
 ## 2. Dataset

@@ -1,7 +1,7 @@
 .PHONY: lint test preflight evaluate report-assets docker-build docker-run docker-build-gpu docker-run-gpu
 
-CONDA_BIN ?= /mnt/8tb_hdd/ryo/miniconda3/bin/conda
-ENV_NAME ?= dl-class-ryo
+CONDA_BIN ?= conda
+ENV_NAME ?= brain-tumor-mri
 GPU_ID ?= 0
 RUN_DIR ?= outputs/convnext_tiny_mtl
 
