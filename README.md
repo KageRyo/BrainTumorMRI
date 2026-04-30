@@ -1,5 +1,9 @@
 # BrainTumorMRI
 
+![CI](https://github.com/KageRyo/BrainTumorMRI/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-Apache--2.0-green)
+
 BrainTumorMRI trains a PyTorch + MONAI multitask model on the BRISC 2025 brain MRI dataset:
 
 - Classification: 4 classes, `no_tumor`, `glioma`, `meningioma`, `pituitary`
@@ -10,22 +14,24 @@ Dataset source: <https://www.kaggle.com/datasets/briscdataset/brisc2025>
 
 ## Model Choice
 
-Recommended model: **Shared ConvNeXt-Base encoder + classification head + U-Net decoder**.
+The current practical headline model is **ConvNeXt-Tiny MTL**: a shared ConvNeXt-Tiny encoder with a classification
+head and a U-Net style segmentation decoder.
 
-Why this is the best default for this hardware and dataset:
+ConvNeXt-Tiny is used as the headline model because it provides the best classification and binary detection results
+while keeping inference lighter. ConvNeXt-Base remains useful when segmentation Dice is the main priority.
 
-- ConvNeXt-Base is a strong modern CNN backbone for 2D MRI slices and should run comfortably on an RTX 4090.
+- ConvNeXt-Tiny is the current practical default, while ConvNeXt-Base is kept as a stronger segmentation-oriented variant.
 - The shared encoder learns tumor morphology once, then serves both class prediction and mask prediction.
 - U-Net style skip connections preserve spatial detail for masks, which is important for medical segmentation boundaries.
 - It is easier to train and debug than Swin-UNETR while still being strong enough for BRISC scale.
 
-Expected target range after tuning:
+Current headline result on the official BRISC test split:
 
-- 4-class classification accuracy: about 97.5-98.8%
-- Binary tumor detection accuracy: usually at or above classification accuracy
-- Segmentation Dice: about 0.89-0.93
-
-These are realistic goals, not guaranteed results. Final numbers depend on augmentation, image size, seed, train/validation split, and checkpoint selection.
+- 4-class classification accuracy: 0.9940
+- Binary tumor detection accuracy: 1.0000
+- Segmentation Dice: 0.8387
+- Segmentation IoU: 0.7814
+- ECE: 0.0055
 
 ## Environment
 
@@ -62,7 +68,7 @@ path = kagglehub.dataset_download("briscdataset/brisc2025")
 print("Path to dataset files:", path)
 ```
 
-Then set `data_root` in [configs/convnext_base_mtl.yaml](/mnt/8tb_hdd/ryo/BrainTumorMRI/configs/convnext_base_mtl.yaml) if needed.
+Then set `data_root` in [configs/convnext_base_mtl.yaml](configs/convnext_base_mtl.yaml) if needed.
 
 Expected structure:
 
@@ -91,9 +97,7 @@ This project is configured to train with PyTorch on GPU. The training entry poin
 ## Train
 
 ```bash
-/mnt/8tb_hdd/ryo/miniconda3/bin/conda run -n dl-class-ryo python -m brain_tumor_mri.train \
-  --config configs/convnext_base_mtl.yaml \
-  --device cuda
+python -m brain_tumor_mri.train --config configs/convnext_base_mtl.yaml --device cuda
 ```
 
 Outputs are written to `outputs/convnext_base_mtl/`:
@@ -150,13 +154,16 @@ The current headline checkpoint is `outputs/convnext_tiny_mtl/best.pt`. It reach
 accuracy, 1.0000 binary tumor detection accuracy, 0.8387 Dice, 0.7814 IoU, and 0.0055 ECE on the official BRISC test
 split.
 
-Detailed results are documented in [reports/report.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/reports/report.md). Model
+The current model is stronger as a classification/detection system than as a high-precision segmentation system.
+Segmentation boundaries and small tumor regions should be reviewed manually.
+
+Detailed results are documented in [reports/report.md](reports/report.md). Model
 comparisons, training curves, multi-seed results, qualitative examples, and the confusion matrix are also under
 `reports/`.
 
-![Qualitative predictions](/mnt/8tb_hdd/ryo/BrainTumorMRI/reports/figures/qualitative_convnext_tiny_mtl.png)
+![Qualitative predictions](reports/figures/qualitative_convnext_tiny_mtl.png)
 
-For the full reproduction workflow, see [docs/runbook.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/docs/runbook.md).
+For the full reproduction workflow, see [docs/runbook.md](docs/runbook.md).
 
 ## Predict One Image
 
@@ -209,8 +216,7 @@ scripts/docker_run_demo_gpu.sh
 ```
 
 This server has 2x RTX 4090 GPUs. GPU-specific Docker workflows for this machine are documented in
-[docs/server-4090.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/docs/server-4090.md). General Docker options are documented in
-[docs/docker.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/docs/docker.md).
+[docs/server-4090.md](docs/server-4090.md). General Docker options are documented in [docs/docker.md](docs/docker.md).
 
 ## Report Assets
 
