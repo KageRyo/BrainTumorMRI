@@ -10,6 +10,12 @@ BrainTumorMRI trains a PyTorch + MONAI multitask model on the BRISC 2025 brain M
 - Detection: derived binary output from the classification head, tumor vs no tumor
 - Segmentation: binary tumor mask from the segmentation decoder
 
+Project documentation:
+
+- [Model Card](MODEL_CARD.md)
+- [Dataset Card](DATASET_CARD.md)
+- [Analysis Report](reports/report.md)
+
 Dataset source: <https://www.kaggle.com/datasets/briscdataset/brisc2025>
 
 ## Model Choice
