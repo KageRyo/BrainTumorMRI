@@ -1,0 +1,23 @@
+FROM pytorch/pytorch:2.5.1-cuda12.1-cudnn9-runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY app ./app
+COPY configs ./configs
+COPY scripts ./scripts
+COPY src ./src
+
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cu121 \
+        torchvision==0.20.1 \
+    && python -m pip install --no-cache-dir -e ".[demo]"
+
+EXPOSE 7860
+
+CMD ["python", "app/gradio_app.py", "--checkpoint", "outputs/convnext_tiny_mtl/best.pt", "--device", "cuda", "--host", "0.0.0.0"]

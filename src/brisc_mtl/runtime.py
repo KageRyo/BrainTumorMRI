@@ -14,7 +14,10 @@ def build_model(cfg: dict[str, Any]) -> ConvNeXtUNetMultiTask:
 
 
 def load_checkpoint(path: str | Path) -> dict[str, Any]:
-    return torch.load(path, map_location="cpu")
+    try:
+        return torch.load(path, map_location="cpu", weights_only=True)
+    except TypeError:
+        return torch.load(path, map_location="cpu")
 
 
 def load_model_from_checkpoint(path: str | Path, dev: torch.device) -> tuple[nn.Module, dict[str, Any]]:

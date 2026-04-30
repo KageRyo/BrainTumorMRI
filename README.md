@@ -1,6 +1,6 @@
-# BRISC 2025 Brain Tumor Multitask Detection
+# BrainTumorMRI
 
-This project trains a PyTorch + MONAI multitask model on the BRISC 2025 brain MRI dataset:
+BrainTumorMRI trains a PyTorch + MONAI multitask model on the BRISC 2025 brain MRI dataset:
 
 - Classification: 4 classes, `no_tumor`, `glioma`, `meningioma`, `pituitary`
 - Detection: derived binary output from the classification head, tumor vs no tumor
@@ -121,6 +121,12 @@ GPU_ID=0 BATCH_SIZE=16 scripts/train_full.sh
 python -m brisc_mtl.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
 ```
 
+Or evaluate the current headline checkpoint on a selected GPU:
+
+```bash
+GPU_ID=0 RUN_DIR=outputs/convnext_tiny_mtl scripts/evaluate_best.sh
+```
+
 This evaluates on the official BRISC `test` split and writes:
 
 ```text
@@ -137,6 +143,20 @@ Main metrics:
 - `dice`: segmentation mask Dice
 - `segmentation`: IoU, precision, and recall for binary tumor masks
 - `confusion_matrix`: 4-class confusion matrix
+
+## Results
+
+The current headline checkpoint is `outputs/convnext_tiny_mtl/best.pt`. It reaches 0.9940 test classification
+accuracy, 1.0000 binary tumor detection accuracy, 0.8387 Dice, 0.7814 IoU, and 0.0055 ECE on the official BRISC test
+split.
+
+Detailed results are documented in [reports/report.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/reports/report.md). Model
+comparisons, training curves, multi-seed results, qualitative examples, and the confusion matrix are also under
+`reports/`.
+
+![Qualitative predictions](/mnt/8tb_hdd/ryo/BrainTumorMRI/reports/figures/qualitative_convnext_tiny_mtl.png)
+
+For the full reproduction workflow, see [docs/runbook.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/docs/runbook.md).
 
 ## Predict One Image
 
@@ -163,6 +183,42 @@ python app/gradio_app.py --checkpoint outputs/convnext_base_mtl/best.pt --device
 ```
 
 The app accepts one MRI image and returns the predicted class, class probabilities, predicted mask, and mask overlay. It is a research demo only and is not for clinical diagnosis.
+
+## Docker Demo
+
+Build the CPU demo image:
+
+```bash
+scripts/docker_build.sh
+```
+
+Run it with a local checkpoint mounted into the container:
+
+```bash
+scripts/docker_run_demo.sh
+```
+
+The default container command expects `outputs/convnext_tiny_mtl/best.pt`. Override `CMD` or mount the matching
+checkpoint path if you want to serve a different run.
+
+For GPU Docker serving on a machine with NVIDIA Container Toolkit:
+
+```bash
+scripts/docker_build_gpu.sh
+scripts/docker_run_demo_gpu.sh
+```
+
+This server has 2x RTX 4090 GPUs. GPU-specific Docker workflows for this machine are documented in
+[docs/server-4090.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/docs/server-4090.md). General Docker options are documented in
+[docs/docker.md](/mnt/8tb_hdd/ryo/BrainTumorMRI/docs/docker.md).
+
+## Report Assets
+
+Regenerate evaluation metrics, training curves, qualitative predictions, and report figures:
+
+```bash
+GPU_ID=0 RUN_DIR=outputs/convnext_tiny_mtl scripts/make_report_assets.sh
+```
 
 ## Notes
 

@@ -86,7 +86,7 @@ def main() -> None:
             gr.Image(type="pil", image_mode="RGB", label="Mask overlay"),
             gr.Textbox(label="Warning"),
         ],
-        title="BRISC Brain Tumor MRI Multitask Demo",
+        title="BrainTumorMRI Demo",
         description=DISCLAIMER,
     )
     demo.launch(server_name=args.host, server_port=args.port)

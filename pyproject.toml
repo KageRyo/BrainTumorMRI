@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "brisc-multitask-tumor-detection"
+name = "brain-tumor-mri"
 version = "0.1.0"
-description = "PyTorch + MONAI multitask brain tumor classification and segmentation on BRISC 2025."
+description = "BrainTumorMRI: PyTorch + MONAI multitask brain tumor classification and segmentation on BRISC 2025."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -28,6 +28,7 @@ dev = [
 ]
 demo = [
   "gradio>=4.44",
+  "torchvision>=0.16",
 ]
 
 [tool.setuptools.packages.find]
