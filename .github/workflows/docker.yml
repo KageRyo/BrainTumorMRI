@@ -1,0 +1,80 @@
+name: Docker
+
+on:
+  push:
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.gpu"
+      - ".dockerignore"
+      - "pyproject.toml"
+      - "README.md"
+      - "app/**"
+      - "configs/**"
+      - "scripts/docker_*.sh"
+      - "src/**"
+      - ".github/workflows/docker.yml"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "Dockerfile.gpu"
+      - ".dockerignore"
+      - "pyproject.toml"
+      - "README.md"
+      - "app/**"
+      - "configs/**"
+      - "scripts/docker_*.sh"
+      - "src/**"
+      - ".github/workflows/docker.yml"
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Image to build"
+        required: true
+        default: "cpu"
+        type: choice
+        options:
+          - cpu
+          - gpu
+
+jobs:
+  build-cpu:
+    if: github.event_name != 'workflow_dispatch' || inputs.image == 'cpu'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build CPU demo image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: brain-tumor-mri-demo:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-gpu:
+    if: github.event_name == 'workflow_dispatch' && inputs.image == 'gpu'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build GPU demo image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.gpu
+          push: false
+          tags: brain-tumor-mri-demo:gpu-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
