@@ -130,8 +130,12 @@ outputs/convnext_base_mtl/test_eval/metrics.json
 Main metrics:
 
 - `classification_accuracy`: 4-class tumor type classification
+- `classification_macro_f1` and `classification_weighted_f1`: class-imbalance-aware classification metrics
+- `classification_ece`: expected calibration error for predicted class confidence
 - `binary_detection_accuracy`: tumor vs no tumor
+- `binary_detection`: sensitivity, specificity, precision, recall, F1, balanced accuracy, ROC-AUC, and PR-AUC
 - `dice`: segmentation mask Dice
+- `segmentation`: IoU, precision, and recall for binary tumor masks
 - `confusion_matrix`: 4-class confusion matrix
 
 ## Predict One Image
@@ -143,6 +147,22 @@ python -m brisc_mtl.predict \
 ```
 
 The command prints class probabilities and writes a predicted binary mask to `outputs/predictions/`.
+
+## Interactive Demo
+
+Install the optional demo dependency:
+
+```bash
+pip install -e ".[demo]"
+```
+
+Launch the local Gradio app:
+
+```bash
+python app/gradio_app.py --checkpoint outputs/convnext_base_mtl/best.pt --device cuda
+```
+
+The app accepts one MRI image and returns the predicted class, class probabilities, predicted mask, and mask overlay. It is a research demo only and is not for clinical diagnosis.
 
 ## Notes
 

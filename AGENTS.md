@@ -8,7 +8,9 @@ This repository implements a PyTorch + MONAI multitask brain tumor project for B
   - `data.py`: BRISC sample discovery, transforms, dataset, and dataloaders.
   - `model.py`: ConvNeXt shared encoder with classification and U-Net segmentation heads.
   - `train.py`, `evaluate.py`, `predict.py`: CLI entry points.
+  - `metrics.py`: classification, binary detection, calibration, and segmentation metric helpers.
   - `config.py`, `utils.py`: configuration and shared helpers.
+- `app/`: local interactive demos, currently the Gradio inference app.
 - `configs/`: experiment configuration files, currently `convnext_base_mtl.yaml`.
 - `scripts/`: utility scripts such as Kaggle dataset download.
 - `data/`, `outputs/`, checkpoints, and local environments are ignored and must not be committed.
@@ -37,10 +39,17 @@ python -m brisc_mtl.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
 python -m brisc_mtl.predict --checkpoint outputs/convnext_base_mtl/best.pt --image PATH_TO_IMAGE
 ```
 
+Install optional demo dependencies and run the local Gradio app:
+
+```bash
+pip install -e ".[demo]"
+python app/gradio_app.py --checkpoint outputs/convnext_base_mtl/best.pt --device auto
+```
+
 Run linting:
 
 ```bash
-ruff check src scripts
+ruff check src app scripts tests
 ```
 
 ## Coding Style & Naming Conventions
@@ -66,3 +75,7 @@ Use short scopes such as `data`, `model`, `train`, `env`, or `docs`. Pull reques
 ## Security & Configuration Tips
 
 Do not commit Kaggle credentials, downloaded datasets, model checkpoints, or `outputs/`. Keep secrets in local environment variables or Kaggle’s standard credential locations.
+
+## Note
+
+After finish, Claude and Grok will review your code quality.

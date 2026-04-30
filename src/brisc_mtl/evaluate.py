@@ -13,7 +13,13 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from tqdm import tqdm
 
 from brisc_mtl.data import INDEX_TO_CLASS, build_samples, make_loader
-from brisc_mtl.metrics import binary_detection_labels
+from brisc_mtl.metrics import (
+    SegmentationConfusion,
+    binary_detection_labels,
+    binary_detection_metrics,
+    binary_detection_scores,
+    expected_calibration_error,
+)
 from brisc_mtl.runtime import load_model_from_checkpoint
 from brisc_mtl.utils import device, ensure_dir, save_json
 
@@ -69,7 +75,9 @@ def main() -> None:
     )
 
     dice_metric = DiceMetric(include_background=True, reduction="mean")
+    seg_confusion = SegmentationConfusion()
     y_true, y_pred = [], []
+    y_prob = []
 
     with torch.no_grad():
         for batch in tqdm(loader, desc="test"):
@@ -77,22 +85,33 @@ def main() -> None:
             masks = batch["mask"].to(dev, non_blocking=True)
             labels = batch["label"].to(dev, non_blocking=True)
             out = model(images)
-            preds = out["class_logits"].argmax(dim=1)
-            dice_metric(y_pred=torch.sigmoid(out["mask_logits"]) > 0.5, y=masks > 0.5)
+            probabilities = torch.softmax(out["class_logits"], dim=1)
+            preds = probabilities.argmax(dim=1)
+            pred_masks = torch.sigmoid(out["mask_logits"]) > 0.5
+            true_masks = masks > 0.5
+            dice_metric(y_pred=pred_masks, y=true_masks)
+            seg_confusion.update(pred_masks, true_masks)
             y_true.extend(labels.cpu().tolist())
             y_pred.extend(preds.cpu().tolist())
+            y_prob.extend(probabilities.cpu().tolist())
 
     names = [INDEX_TO_CLASS[i] for i in range(len(INDEX_TO_CLASS))]
     report = classification_report(y_true, y_pred, target_names=names, output_dict=True, zero_division=0)
     det_true = binary_detection_labels(y_true)
     det_pred = binary_detection_labels(y_pred)
+    det_scores = binary_detection_scores(y_prob)
     cm = confusion_matrix(y_true, y_pred).tolist()
     confusion_matrix_path = out_dir / "confusion_matrix.png"
     plot_confusion_matrix(cm, names, confusion_matrix_path)
     metrics = {
         "classification_accuracy": accuracy_score(y_true, y_pred),
+        "classification_macro_f1": report["macro avg"]["f1-score"],
+        "classification_weighted_f1": report["weighted avg"]["f1-score"],
+        "classification_ece": expected_calibration_error(y_prob, y_true),
         "binary_detection_accuracy": accuracy_score(det_true, det_pred),
+        "binary_detection": binary_detection_metrics(y_true, y_pred, det_scores),
         "dice": dice_metric.aggregate().item(),
+        "segmentation": seg_confusion.compute(),
         "classification_report": report,
         "confusion_matrix": cm,
         "confusion_matrix_png": str(confusion_matrix_path),
