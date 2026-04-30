@@ -3,7 +3,7 @@ from __future__ import annotations
 import torch
 from pytest import approx
 
-from brisc_mtl.metrics import (
+from brain_tumor_mri.metrics import (
     SegmentationConfusion,
     binary_detection_accuracy,
     binary_detection_labels,

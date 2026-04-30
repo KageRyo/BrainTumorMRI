@@ -10,10 +10,10 @@ from PIL import Image
 from torchvision.transforms import InterpolationMode
 from torchvision.transforms import functional as TF
 
-from brisc_mtl.data import INDEX_TO_CLASS
-from brisc_mtl.preprocessing import image_to_tensor
-from brisc_mtl.runtime import load_model_from_checkpoint
-from brisc_mtl.utils import device
+from brain_tumor_mri.data import INDEX_TO_CLASS
+from brain_tumor_mri.preprocessing import image_to_tensor
+from brain_tumor_mri.runtime import load_model_from_checkpoint
+from brain_tumor_mri.utils import device
 
 DISCLAIMER = "Research demo only. Not for clinical diagnosis."
 

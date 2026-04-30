@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from brisc_mtl.data import BriscMultiTaskDataset, build_samples, class_counts
+from brain_tumor_mri.data import BriscMultiTaskDataset, build_samples, class_counts
 
 
 def _write_image(path: Path, value: int = 128) -> None:

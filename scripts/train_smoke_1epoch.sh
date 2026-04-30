@@ -11,7 +11,7 @@ EVAL_BATCH_SIZE="${EVAL_BATCH_SIZE:-8}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/smoke_1epoch}"
 
 cd "$ROOT_DIR"
-CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brisc_mtl.train \
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brain_tumor_mri.train \
   --config "$CONFIG" \
   --device cuda \
   --epochs 1 \

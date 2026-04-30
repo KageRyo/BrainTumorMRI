@@ -14,11 +14,11 @@ from torch import nn
 from torch.amp import GradScaler, autocast
 from tqdm import tqdm
 
-from brisc_mtl.config import load_config
-from brisc_mtl.data import build_samples, class_counts, make_loader, split_train_val
-from brisc_mtl.metrics import binary_detection_accuracy
-from brisc_mtl.runtime import build_model
-from brisc_mtl.utils import device, ensure_dir, save_json, set_seed
+from brain_tumor_mri.config import load_config
+from brain_tumor_mri.data import build_samples, class_counts, make_loader, split_train_val
+from brain_tumor_mri.metrics import binary_detection_accuracy
+from brain_tumor_mri.runtime import build_model
+from brain_tumor_mri.utils import device, ensure_dir, save_json, set_seed
 
 
 def load_history(path: Path) -> list[dict]:

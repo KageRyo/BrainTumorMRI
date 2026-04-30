@@ -10,7 +10,7 @@ GPU_ID="${GPU_ID:-0}"
 DEVICE="${DEVICE:-cuda}"
 
 cd "$ROOT_DIR"
-CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brisc_mtl.evaluate \
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brain_tumor_mri.evaluate \
   --checkpoint "$CHECKPOINT" \
   --device "$DEVICE" \
   "$@"

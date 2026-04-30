@@ -92,14 +92,22 @@ def main() -> None:
         metrics_path = run_dir / "test_eval" / "metrics.json"
         if not args.skip_existing or not metrics_path.exists():
             run_command(
-                [sys.executable, "-m", "brisc_mtl.train", "--config", str(seed_config_path), "--device", args.device],
+                [
+                    sys.executable,
+                    "-m",
+                    "brain_tumor_mri.train",
+                    "--config",
+                    str(seed_config_path),
+                    "--device",
+                    args.device,
+                ],
                 args.gpu_id,
             )
             run_command(
                 [
                     sys.executable,
                     "-m",
-                    "brisc_mtl.evaluate",
+                    "brain_tumor_mri.evaluate",
                     "--checkpoint",
                     str(run_dir / "best.pt"),
                     "--device",

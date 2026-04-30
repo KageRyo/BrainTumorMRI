@@ -4,7 +4,7 @@
 
 This repository implements a PyTorch + MONAI multitask brain tumor project for BRISC 2025.
 
-- `src/brisc_mtl/`: package source code.
+- `src/brain_tumor_mri/`: package source code.
   - `data.py`: BRISC sample discovery, transforms, dataset, and dataloaders.
   - `model.py`: ConvNeXt shared encoder with classification and U-Net segmentation heads.
   - `train.py`, `evaluate.py`, `predict.py`: CLI entry points.
@@ -34,9 +34,9 @@ python scripts/download_dataset.py --copy --out data/brisc2025
 Train, evaluate, and run single-image inference:
 
 ```bash
-python -m brisc_mtl.train --config configs/convnext_base_mtl.yaml
-python -m brisc_mtl.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
-python -m brisc_mtl.predict --checkpoint outputs/convnext_base_mtl/best.pt --image PATH_TO_IMAGE
+python -m brain_tumor_mri.train --config configs/convnext_base_mtl.yaml
+python -m brain_tumor_mri.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
+python -m brain_tumor_mri.predict --checkpoint outputs/convnext_base_mtl/best.pt --image PATH_TO_IMAGE
 ```
 
 Install optional demo dependencies and run the local Gradio app:

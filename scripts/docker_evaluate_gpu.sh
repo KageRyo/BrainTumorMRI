@@ -19,7 +19,7 @@ docker run --rm --gpus "$DOCKER_GPUS" \
   -v "$ROOT_DIR/data:/app/data:ro" \
   -v "$ROOT_DIR/outputs:/app/outputs" \
   "$IMAGE_NAME" \
-  python -m brisc_mtl.evaluate \
+  python -m brain_tumor_mri.evaluate \
     --checkpoint "$CHECKPOINT" \
     --device "$DEVICE" \
     "$@"

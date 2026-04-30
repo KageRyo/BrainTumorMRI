@@ -14,7 +14,7 @@ REPORT_FIGURES_DIR="${REPORT_FIGURES_DIR:-reports/figures}"
 cd "$ROOT_DIR"
 mkdir -p "$REPORT_FIGURES_DIR"
 
-CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brisc_mtl.evaluate \
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brain_tumor_mri.evaluate \
   --checkpoint "$CHECKPOINT" \
   --device "$DEVICE"
 

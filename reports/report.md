@@ -63,7 +63,7 @@ Headline checkpoint: `outputs/convnext_tiny_mtl/best.pt`
 Evaluation command:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python -m brisc_mtl.evaluate \
+CUDA_VISIBLE_DEVICES=0 python -m brain_tumor_mri.evaluate \
   --checkpoint outputs/convnext_tiny_mtl/best.pt \
   --device cuda
 ```

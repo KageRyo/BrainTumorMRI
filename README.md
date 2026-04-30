@@ -91,7 +91,7 @@ This project is configured to train with PyTorch on GPU. The training entry poin
 ## Train
 
 ```bash
-/mnt/8tb_hdd/ryo/miniconda3/bin/conda run -n dl-class-ryo python -m brisc_mtl.train \
+/mnt/8tb_hdd/ryo/miniconda3/bin/conda run -n dl-class-ryo python -m brain_tumor_mri.train \
   --config configs/convnext_base_mtl.yaml \
   --device cuda
 ```
@@ -118,7 +118,7 @@ GPU_ID=0 BATCH_SIZE=16 scripts/train_full.sh
 ## Evaluate
 
 ```bash
-python -m brisc_mtl.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
+python -m brain_tumor_mri.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
 ```
 
 Or evaluate the current headline checkpoint on a selected GPU:
@@ -161,7 +161,7 @@ For the full reproduction workflow, see [docs/runbook.md](/mnt/8tb_hdd/ryo/Brain
 ## Predict One Image
 
 ```bash
-python -m brisc_mtl.predict \
+python -m brain_tumor_mri.predict \
   --checkpoint outputs/convnext_base_mtl/best.pt \
   --image data/brisc2025/segmentation_task/test/images/brisc2025_test_00001_gl_ax_t1.jpg
 ```

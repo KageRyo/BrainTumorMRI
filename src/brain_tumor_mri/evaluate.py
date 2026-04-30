@@ -12,16 +12,16 @@ from monai.metrics import DiceMetric
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from tqdm import tqdm
 
-from brisc_mtl.data import INDEX_TO_CLASS, build_samples, make_loader
-from brisc_mtl.metrics import (
+from brain_tumor_mri.data import INDEX_TO_CLASS, build_samples, make_loader
+from brain_tumor_mri.metrics import (
     SegmentationConfusion,
     binary_detection_labels,
     binary_detection_metrics,
     binary_detection_scores,
     expected_calibration_error,
 )
-from brisc_mtl.runtime import load_model_from_checkpoint
-from brisc_mtl.utils import device, ensure_dir, save_json
+from brain_tumor_mri.runtime import load_model_from_checkpoint
+from brain_tumor_mri.utils import device, ensure_dir, save_json
 
 
 def plot_confusion_matrix(matrix: list[list[int]], names: list[str], out_path: Path) -> None:

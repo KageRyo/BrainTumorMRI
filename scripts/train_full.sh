@@ -11,7 +11,7 @@ EVAL_BATCH_SIZE="${EVAL_BATCH_SIZE:-16}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/convnext_base_mtl}"
 
 cd "$ROOT_DIR"
-CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brisc_mtl.train \
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python -m brain_tumor_mri.train \
   --config "$CONFIG" \
   --device cuda \
   --batch-size "$BATCH_SIZE" \

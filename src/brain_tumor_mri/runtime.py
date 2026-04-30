@@ -6,7 +6,7 @@ from typing import Any
 import torch
 from torch import nn
 
-from brisc_mtl.model import ConvNeXtUNetMultiTask
+from brain_tumor_mri.model import ConvNeXtUNetMultiTask
 
 
 def build_model(cfg: dict[str, Any]) -> ConvNeXtUNetMultiTask:

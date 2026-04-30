@@ -12,10 +12,10 @@ import numpy as np
 import torch
 from PIL import Image
 
-from brisc_mtl.data import INDEX_TO_CLASS, BriscSample, build_samples
-from brisc_mtl.preprocessing import image_to_tensor, load_grayscale, mask_to_tensor, resize_pair
-from brisc_mtl.runtime import load_model_from_checkpoint
-from brisc_mtl.utils import device
+from brain_tumor_mri.data import INDEX_TO_CLASS, BriscSample, build_samples
+from brain_tumor_mri.preprocessing import image_to_tensor, load_grayscale, mask_to_tensor, resize_pair
+from brain_tumor_mri.runtime import load_model_from_checkpoint
+from brain_tumor_mri.utils import device
 
 
 def pick_samples(samples: list[BriscSample], samples_per_class: int, seed: int) -> list[BriscSample]:

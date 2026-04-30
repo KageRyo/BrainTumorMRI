@@ -11,9 +11,9 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 
 import torch
 
-from brisc_mtl.config import load_config
-from brisc_mtl.data import build_samples, class_counts, make_loader
-from brisc_mtl.model import ConvNeXtUNetMultiTask
+from brain_tumor_mri.config import load_config
+from brain_tumor_mri.data import build_samples, class_counts, make_loader
+from brain_tumor_mri.model import ConvNeXtUNetMultiTask
 
 
 def status(name: str, ok: bool, detail: str) -> bool:

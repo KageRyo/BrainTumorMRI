@@ -10,7 +10,7 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
-from brisc_mtl.preprocessing import augment_pair, image_to_tensor, load_grayscale, mask_to_tensor, resize_pair
+from brain_tumor_mri.preprocessing import augment_pair, image_to_tensor, load_grayscale, mask_to_tensor, resize_pair
 
 CLASS_TO_INDEX = {
     "no_tumor": 0,
