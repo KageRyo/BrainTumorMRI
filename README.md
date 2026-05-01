@@ -160,6 +160,9 @@ The current headline checkpoint is `outputs/convnext_tiny_mtl/best.pt`. It reach
 accuracy, 1.0000 binary tumor detection accuracy, 0.8387 Dice, 0.7814 IoU, and 0.0055 ECE on the official BRISC test
 split.
 
+These results should be interpreted as in-dataset benchmark performance on the BRISC official test split, not as
+evidence of clinical generalization.
+
 The current model is stronger as a classification/detection system than as a high-precision segmentation system.
 Segmentation boundaries and small tumor regions should be reviewed manually.
 
