@@ -156,5 +156,8 @@ Lowest Dice segmentation examples:
 
 ## 13. Future Work
 
-- Repeat the main experiment with more seeds and report mean plus standard deviation.
-- Evaluate on an external dataset or held-out institution split if available.
+- Compare multitask learning against classification-only and segmentation-only baselines.
+- Add segmentation boundary metrics such as HD95.
+- Add uncertainty estimation with test-time augmentation or ensemble variance.
+- Explore 3D or slice-sequence modeling to use volumetric context.
+- Evaluate external validation or domain-shift robustness.
