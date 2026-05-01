@@ -26,7 +26,7 @@ head and a U-Net style segmentation decoder.
 ConvNeXt-Tiny is used as the headline model because it provides the best classification and binary detection results
 while keeping inference lighter. ConvNeXt-Base remains useful when segmentation Dice is the main priority.
 
-- ConvNeXt-Tiny is the current practical default, while ConvNeXt-Base is kept as a stronger segmentation-oriented variant.
+- ConvNeXt-Tiny is the current practical default for this repository.
 - The shared encoder learns tumor morphology once, then serves both class prediction and mask prediction.
 - U-Net style skip connections preserve spatial detail for masks, which is important for medical segmentation boundaries.
 - It is easier to train and debug than Swin-UNETR while still being strong enough for BRISC scale.
@@ -74,7 +74,7 @@ path = kagglehub.dataset_download("briscdataset/brisc2025")
 print("Path to dataset files:", path)
 ```
 
-Then set `data_root` in [configs/convnext_base_mtl.yaml](configs/convnext_base_mtl.yaml) if needed.
+Then set `data_root` in [configs/convnext_tiny_mtl.yaml](configs/convnext_tiny_mtl.yaml) if needed.
 
 Expected structure:
 
@@ -103,10 +103,10 @@ This project is configured to train with PyTorch on GPU. The training entry poin
 ## Train
 
 ```bash
-python -m brain_tumor_mri.train --config configs/convnext_base_mtl.yaml --device cuda
+python -m brain_tumor_mri.train --config configs/convnext_tiny_mtl.yaml --device cuda
 ```
 
-Outputs are written to `outputs/convnext_base_mtl/`:
+Outputs are written to `outputs/convnext_tiny_mtl/`:
 
 - `best.pt`: best validation checkpoint
 - `last.pt`: last epoch checkpoint
@@ -128,7 +128,7 @@ GPU_ID=0 BATCH_SIZE=16 scripts/train_full.sh
 ## Evaluate
 
 ```bash
-python -m brain_tumor_mri.evaluate --checkpoint outputs/convnext_base_mtl/best.pt
+python -m brain_tumor_mri.evaluate --checkpoint outputs/convnext_tiny_mtl/best.pt
 ```
 
 Or evaluate the current headline checkpoint on a selected GPU:
@@ -140,7 +140,7 @@ GPU_ID=0 RUN_DIR=outputs/convnext_tiny_mtl scripts/evaluate_best.sh
 This evaluates on the official BRISC `test` split and writes:
 
 ```text
-outputs/convnext_base_mtl/test_eval/metrics.json
+outputs/convnext_tiny_mtl/test_eval/metrics.json
 ```
 
 Main metrics:
@@ -181,7 +181,7 @@ For the full reproduction workflow, see [docs/runbook.md](docs/runbook.md).
 
 ```bash
 python -m brain_tumor_mri.predict \
-  --checkpoint outputs/convnext_base_mtl/best.pt \
+  --checkpoint outputs/convnext_tiny_mtl/best.pt \
   --image data/brisc2025/segmentation_task/test/images/brisc2025_test_00001_gl_ax_t1.jpg
 ```
 
@@ -200,7 +200,7 @@ pip install -e ".[demo]"
 Launch the local Gradio app:
 
 ```bash
-python app/gradio_app.py --checkpoint outputs/convnext_base_mtl/best.pt --device cuda
+python app/gradio_app.py --checkpoint outputs/convnext_tiny_mtl/best.pt --device cuda
 ```
 
 The app accepts one MRI image and returns the predicted class, class probabilities, predicted mask, and mask overlay. It is a research demo only and is not for clinical diagnosis.
