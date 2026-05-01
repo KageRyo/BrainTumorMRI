@@ -47,6 +47,16 @@ Current headline result on the official BRISC test split:
 
 Detailed results are documented in [reports/report.md](reports/report.md).
 
+## Stability Across Seeds
+
+ConvNeXt-Tiny was evaluated across 3 seeds:
+
+| Metric | Mean | Std |
+| --- | ---: | ---: |
+| Test Classification Accuracy | 0.9920 | 0.0020 |
+| Test Detection Accuracy | 1.0000 | 0.0000 |
+| Test Dice | 0.8360 | 0.0024 |
+
 ## Limitations
 
 - The model is evaluated on one official test split and has not been externally validated.
