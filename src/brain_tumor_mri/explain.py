@@ -21,8 +21,14 @@ def classification_gradcam(model: nn.Module, image: torch.Tensor, class_index: i
 
     activation: torch.Tensor | None = None
 
-    def capture_activation(_module: nn.Module, _inputs: tuple[torch.Tensor, ...], output: list[torch.Tensor]) -> None:
+    def capture_activation(
+        _module: nn.Module,
+        _inputs: tuple[torch.Tensor, ...],
+        output: list[torch.Tensor] | tuple[torch.Tensor, ...],
+    ) -> None:
         nonlocal activation
+        if not isinstance(output, (list, tuple)) or not output:
+            raise RuntimeError("Expected encoder to return a non-empty feature list")
         activation = output[-1]
         activation.retain_grad()
 
