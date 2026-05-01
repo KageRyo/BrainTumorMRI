@@ -97,10 +97,17 @@ GPU_ID=0 RUN_DIR=outputs/convnext_tiny_mtl scripts/make_report_assets.sh
 This updates:
 
 ```text
+outputs/<run>/test_eval/metrics.json
+reports/threshold_analysis.md
 reports/figures/<run>_history.png
 reports/figures/qualitative_<run>.png
 reports/figures/<run>_confusion_matrix.png
-outputs/<run>/test_eval/metrics.json
+reports/figures/gradcam_examples.png
+reports/figures/calibration_curve.png
+reports/figures/roc_curve.png
+reports/figures/pr_curve.png
+reports/figures/classification_failures.png
+reports/figures/low_dice_cases.png
 ```
 
 Update [reports/report.md](../reports/report.md) if headline metrics change.

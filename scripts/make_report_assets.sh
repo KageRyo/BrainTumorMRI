@@ -31,3 +31,26 @@ CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python scripts/ma
 if [[ -f "$RUN_DIR/test_eval/confusion_matrix.png" ]]; then
   cp "$RUN_DIR/test_eval/confusion_matrix.png" "$REPORT_FIGURES_DIR/$(basename "$RUN_DIR")_confusion_matrix.png"
 fi
+
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python scripts/make_gradcam_grid.py \
+  --checkpoint "$CHECKPOINT" \
+  --device "$DEVICE" \
+  --out "$REPORT_FIGURES_DIR/gradcam_examples.png"
+
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python scripts/plot_calibration.py \
+  --checkpoint "$CHECKPOINT" \
+  --device "$DEVICE" \
+  --out "$REPORT_FIGURES_DIR/calibration_curve.png"
+
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python scripts/analyze_thresholds.py \
+  --checkpoint "$CHECKPOINT" \
+  --device "$DEVICE" \
+  --out reports/threshold_analysis.md \
+  --roc-out "$REPORT_FIGURES_DIR/roc_curve.png" \
+  --pr-out "$REPORT_FIGURES_DIR/pr_curve.png"
+
+CUDA_VISIBLE_DEVICES="$GPU_ID" "$CONDA_BIN" run -n "$ENV_NAME" python scripts/make_failure_grid.py \
+  --checkpoint "$CHECKPOINT" \
+  --device "$DEVICE" \
+  --classification-out "$REPORT_FIGURES_DIR/classification_failures.png" \
+  --low-dice-out "$REPORT_FIGURES_DIR/low_dice_cases.png"
